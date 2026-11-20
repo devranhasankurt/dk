@@ -1,0 +1,396 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DK VISUALS Client Portal">
+    <title>Client Portal | DK VISUALS</title>
+
+    <link rel="stylesheet" href="assets/css/clientportal.css">
+</head>
+
+<body>
+
+    <!-- ====================
+         SIDEBAR
+    ==================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <a href="index.html">
+                DK <span>VISUALS</span>
+            </a>
+        </div>
+
+        <div class="sidebar-label">WORKSPACE</div>
+
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                <span class="nav-icon">▦</span>
+                Dashboard
+            </a>
+
+            <a href="#project" class="nav-link" data-section="project">
+                <span class="nav-icon">◫</span>
+                Project
+            </a>
+
+            <a href="#files" class="nav-link" data-section="files">
+                <span class="nav-icon">▤</span>
+                Files
+            </a>
+
+            <a href="#invoices" class="nav-link" data-section="invoices">
+                <span class="nav-icon">▧</span>
+                Invoices
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="index.html" class="back-link">
+                ← Back to website
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- ====================
+         MAIN CONTENT
+    ==================== -->
+
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="breadcrumb">
+                <span>DK VISUALS</span>
+                <span class="breadcrumb-divider">/</span>
+                <span>Client Portal</span>
+            </div>
+
+            <div class="topbar-right">
+                <div class="client-avatar" id="clientAvatar">C</div>
+
+                <div class="client-info">
+                    <span class="client-name" id="clientName">Client</span>
+                    <span class="client-role">Client account</span>
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- ====================
+             DASHBOARD
+        ==================== -->
+
+        <section class="page-section active" id="dashboard">
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">CLIENT WORKSPACE</span>
+                    <h1>Welcome back, <span id="welcomeName">Client</span>.</h1>
+                    <p>Here's an overview of your project and account.</p>
+                </div>
+
+                <div class="date-display" id="currentDate"></div>
+            </div>
+
+
+            <!-- PROJECT OVERVIEW -->
+
+            <div class="section-heading">
+                <h2>Project overview</h2>
+                <span class="section-subtitle">Your current project</span>
+            </div>
+
+            <div class="project-overview">
+
+                <div class="project-main">
+                    <div class="project-top">
+                        <span class="status-label" id="projectStatus">In progress</span>
+                        <span class="project-id" id="projectId">PROJECT —</span>
+                    </div>
+
+                    <h3 id="projectName">Website Development</h3>
+
+                    <p id="projectDescription">
+                        Your project details will appear here.
+                    </p>
+
+                    <div class="progress-info">
+                        <span>Project progress</span>
+                        <span id="progressPercentage">0%</span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="project-details">
+
+                    <div class="detail-item">
+                        <span class="detail-label">Start date</span>
+                        <span class="detail-value" id="startDate">—</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Estimated delivery</span>
+                        <span class="detail-value" id="deliveryDate">—</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Project type</span>
+                        <span class="detail-value" id="projectType">—</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUICK STATS -->
+
+            <div class="section-heading">
+                <h2>Account overview</h2>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <span class="stat-label">Project progress</span>
+                    <span class="stat-value" id="statProgress">0%</span>
+                    <span class="stat-description">Overall completion</span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Files</span>
+                    <span class="stat-value" id="statFiles">0</span>
+                    <span class="stat-description">Available documents</span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Invoices</span>
+                    <span class="stat-value" id="statInvoices">0</span>
+                    <span class="stat-description">Total invoices</span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Outstanding</span>
+                    <span class="stat-value" id="statOutstanding">€0.00</span>
+                    <span class="stat-description">Unpaid amount</span>
+                </div>
+
+            </div>
+
+
+            <!-- RECENT ACTIVITY -->
+
+            <div class="section-heading">
+                <h2>Project updates</h2>
+                <span class="section-subtitle">Latest project progress</span>
+            </div>
+
+            <div class="updates-container" id="updatesContainer">
+
+                <div class="empty-state">
+                    <p>No project updates available.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================
+             PROJECT
+        ==================== -->
+
+        <section class="page-section" id="project">
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">WORKSPACE</span>
+                    <h1>Your project.</h1>
+                    <p>Follow the progress and details of your project.</p>
+                </div>
+            </div>
+
+
+            <div class="content-card">
+
+                <div class="card-heading">
+                    <h2>Project information</h2>
+                    <span class="status-label" id="projectPageStatus">In progress</span>
+                </div>
+
+                <div class="project-information">
+
+                    <div class="information-item">
+                        <span class="detail-label">Project name</span>
+                        <span class="detail-value" id="projectPageName">—</span>
+                    </div>
+
+                    <div class="information-item">
+                        <span class="detail-label">Project ID</span>
+                        <span class="detail-value" id="projectPageId">—</span>
+                    </div>
+
+                    <div class="information-item">
+                        <span class="detail-label">Project type</span>
+                        <span class="detail-value" id="projectPageType">—</span>
+                    </div>
+
+                    <div class="information-item">
+                        <span class="detail-label">Start date</span>
+                        <span class="detail-value" id="projectPageStart">—</span>
+                    </div>
+
+                    <div class="information-item">
+                        <span class="detail-label">Estimated delivery</span>
+                        <span class="detail-value" id="projectPageDelivery">—</span>
+                    </div>
+
+                </div>
+
+                <div class="project-description">
+                    <span class="detail-label">Description</span>
+                    <p id="projectPageDescription">—</p>
+                </div>
+
+            </div>
+
+
+            <div class="content-card">
+
+                <div class="card-heading">
+                    <h2>Project timeline</h2>
+                </div>
+
+                <div class="timeline" id="timelineContainer">
+
+                    <div class="empty-state">
+                        <p>No timeline information available.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================
+             FILES
+        ==================== -->
+
+        <section class="page-section" id="files">
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">DOCUMENTS</span>
+                    <h1>Your files.</h1>
+                    <p>Access documents and files related to your project.</p>
+                </div>
+            </div>
+
+
+            <div class="content-card">
+
+                <div class="card-heading">
+                    <h2>Available files</h2>
+                    <span class="section-subtitle" id="fileCount">0 files</span>
+                </div>
+
+                <div class="files-container" id="filesContainer">
+
+                    <div class="empty-state">
+                        <p>No files available.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================
+             INVOICES
+        ==================== -->
+
+        <section class="page-section" id="invoices">
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">FINANCIAL OVERVIEW</span>
+                    <h1>Your invoices.</h1>
+                    <p>View and download your project invoices.</p>
+                </div>
+            </div>
+
+
+            <div class="invoice-summary">
+
+                <div class="stat-card">
+                    <span class="stat-label">Total invoiced</span>
+                    <span class="stat-value" id="totalInvoiced">€0.00</span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Paid</span>
+                    <span class="stat-value" id="totalPaid">€0.00</span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Outstanding</span>
+                    <span class="stat-value" id="totalUnpaid">€0.00</span>
+                </div>
+
+            </div>
+
+
+            <div class="content-card">
+
+                <div class="card-heading">
+                    <h2>Invoice history</h2>
+                    <span class="section-subtitle" id="invoiceCount">0 invoices</span>
+                </div>
+
+                <div class="invoices-container" id="invoicesContainer">
+
+                    <div class="empty-state">
+                        <p>No invoices available.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================
+             FOOTER
+        ==================== -->
+
+        <footer class="portal-footer">
+            <span>© 2026 DK VISUALS. ALL RIGHTS RESERVED.</span>
+            <span>DESIGNED & DEVELOPED BY DK VISUALS</span>
+        </footer>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="assets/js/clientportal.js"></script>
+
+</body>
+</html>
