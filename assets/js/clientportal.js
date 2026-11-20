@@ -1,12 +1,22 @@
 
+"use strict";
+
+// ==========================================
+// CONFIGURATION
+// ==========================================
+
 const CLIENTS_PATH = "assets/data/clients.json";
+
+// ==========================================
+// APPLICATION STATE
+// ==========================================
 
 let clients = [];
 let currentClient = null;
 
-// ================================
-// ELEMENTS
-// ================================
+// ==========================================
+// DOM ELEMENTS
+// ==========================================
 
 const loginScreen = document.getElementById("loginScreen");
 const portalContent = document.getElementById("portalContent");
@@ -19,50 +29,90 @@ const loginButton = document.getElementById("loginButton");
 
 const logoutButton = document.getElementById("logoutButton");
 
-// ================================
-// LOAD CLIENT DATA
-// ================================
+const navigationLinks = document.querySelectorAll("[data-section]");
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", initializePortal);
+
+async function initializePortal() {
+    // Always start at the login screen.
+    loginScreen.hidden = false;
+    portalContent.hidden = true;
+
+    // Load client records.
+    await loadClients();
+
+    // Attach event listeners.
+    loginForm.addEventListener("submit", handleLogin);
+    logoutButton.addEventListener("click", handleLogout);
+
+    navigationLinks.forEach(link => {
+        link.addEventListener("click", handleNavigation);
+    });
+}
+
+// ==========================================
+// LOAD CLIENTS
+// ==========================================
 
 async function loadClients() {
+    loginButton.disabled = true;
+    loginButton.querySelector("span").textContent = "Loading...";
+
     try {
-        const response = await fetch(CLIENTS_PATH);
+        const response = await fetch(CLIENTS_PATH, {
+            cache: "no-store"
+        });
 
         if (!response.ok) {
-            throw new Error("Could not load clients.json");
+            throw new Error(`Could not load clients.json (${response.status})`);
         }
 
         const data = await response.json();
 
-        if (!Array.isArray(data.clients)) {
-            throw new Error("Invalid clients.json structure");
+        if (!data || !Array.isArray(data.clients)) {
+            throw new Error("Invalid clients.json format.");
         }
 
         clients = data.clients;
 
+        loginButton.disabled = false;
+        loginButton.querySelector("span").textContent = "Sign in";
+
     } catch (error) {
-        console.error("Client data error:", error);
+        console.error("Client portal loading error:", error);
 
         loginError.textContent =
-            "Unable to load client data. Please try again later.";
+            "Unable to connect to the client portal. Please try again later.";
 
-        loginButton.disabled = true;
+        loginButton.querySelector("span").textContent = "Unavailable";
     }
 }
 
-// ================================
+// ==========================================
 // LOGIN
-// ================================
+// ==========================================
 
-loginForm.addEventListener("submit", function (event) {
+function handleLogin(event) {
     event.preventDefault();
 
     loginError.textContent = "";
 
+    if (clients.length === 0) {
+        loginError.textContent =
+            "Client information could not be loaded. Please refresh the page.";
+        return;
+    }
+
     const email = loginEmail.value.trim().toLowerCase();
     const password = loginPassword.value;
 
-    const client = clients.find(function (item) {
+    const client = clients.find(item => {
         return (
+            typeof item.email === "string" &&
             item.email.toLowerCase() === email &&
             item.password === password &&
             item.active === true
@@ -70,46 +120,53 @@ loginForm.addEventListener("submit", function (event) {
     });
 
     if (!client) {
-        loginError.textContent =
-            "Incorrect email or password.";
-
+        loginError.textContent = "Incorrect email or password.";
+        loginPassword.value = "";
+        loginPassword.focus();
         return;
     }
 
     currentClient = client;
 
+    // Hide login and show portal.
     loginScreen.hidden = true;
     portalContent.hidden = false;
 
-    loginPassword.value = "";
+    loginForm.reset();
 
+    // Render all client information.
     renderPortal();
-});
 
-// ================================
+    // Start at dashboard.
+    showSection("dashboard");
+
+    window.scrollTo(0, 0);
+}
+
+// ==========================================
 // LOGOUT
-// ================================
+// ==========================================
 
-logoutButton.addEventListener("click", function () {
+function handleLogout() {
     currentClient = null;
 
+    // Hide portal and show login.
     portalContent.hidden = true;
     loginScreen.hidden = false;
 
+    // Reset login form.
     loginForm.reset();
     loginError.textContent = "";
 
+    // Reset navigation.
     showSection("dashboard");
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-});
+    window.scrollTo(0, 0);
+}
 
-// ================================
-// PORTAL INITIALIZATION
-// ================================
+// ==========================================
+// RENDER PORTAL
+// ==========================================
 
 function renderPortal() {
     if (!currentClient) return;
@@ -119,140 +176,138 @@ function renderPortal() {
     renderProject();
     renderFiles();
     renderInvoices();
-
-    showSection("dashboard");
 }
 
-// ================================
+// ==========================================
 // CLIENT INFORMATION
-// ================================
+// ==========================================
 
 function renderClientInfo() {
-    const clientName = document.getElementById("clientName");
-    const clientEmail = document.getElementById("clientEmail");
+    setText("clientName", currentClient.name);
+    setText("clientEmail", currentClient.email);
 
-    if (clientName) {
-        clientName.textContent = currentClient.name || "Client";
+    const avatar = document.getElementById("clientAvatar");
+
+    if (avatar) {
+        avatar.textContent = (currentClient.name || "C")
+            .trim()
+            .charAt(0)
+            .toUpperCase();
     }
 
-    if (clientEmail) {
-        clientEmail.textContent = currentClient.email || "";
-    }
+    setText("dashboardClientName", currentClient.name);
 }
 
-// ================================
+// ==========================================
 // DASHBOARD
-// ================================
+// ==========================================
 
 function renderDashboard() {
     const project = currentClient.project || {};
 
-    setText("dashboardClientName", currentClient.name || "Client");
     setText("dashboardProjectName", project.name || "No project");
     setText("dashboardProjectStatus", project.status || "Not started");
+    setText("dashboardDeliveryDate", formatDate(project.deliveryDate));
 
-    const progress = Number(project.progress) || 0;
+    const progress = getProgress(project.progress);
 
     setText("dashboardProgress", `${progress}%`);
-
-    const progressBar = document.getElementById("dashboardProgressBar");
-
-    if (progressBar) {
-        progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-    }
-
-    setText(
-        "dashboardDeliveryDate",
-        formatDate(project.deliveryDate)
-    );
+    setProgressBar("dashboardProgressBar", progress);
 
     renderRecentUpdates();
 }
 
-// ================================
+// ==========================================
 // RECENT UPDATES
-// ================================
+// ==========================================
 
 function renderRecentUpdates() {
     const container = document.getElementById("recentUpdates");
-
     if (!container) return;
-
-    const updates = currentClient.updates || [];
 
     container.replaceChildren();
 
+    const updates = [...(currentClient.updates || [])];
+
+    updates.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+
     if (updates.length === 0) {
-        container.textContent = "No updates available yet.";
+        container.appendChild(createEmptyMessage("No updates available yet."));
         return;
     }
 
-    updates.slice().reverse().forEach(function (update) {
-        const item = document.createElement("div");
+    updates.forEach(update => {
+        const item = document.createElement("article");
         item.className = "update-item";
 
-        const title = document.createElement("h4");
+        const marker = document.createElement("span");
+        marker.className = "update-marker";
+
+        const content = document.createElement("div");
+        content.className = "update-content";
+
+        const title = document.createElement("h3");
         title.textContent = update.title || "Project update";
 
         const description = document.createElement("p");
         description.textContent = update.description || "";
 
         const date = document.createElement("span");
+        date.className = "update-date";
         date.textContent = formatDate(update.date);
 
-        item.append(title, description, date);
+        content.append(title, description, date);
+        item.append(marker, content);
+
         container.appendChild(item);
     });
 }
 
-// ================================
+// ==========================================
 // PROJECT
-// ================================
+// ==========================================
 
 function renderProject() {
     const project = currentClient.project || {};
 
+    setText("projectId", project.id || "—");
     setText("projectName", project.name || "No project");
     setText("projectDescription", project.description || "");
-    setText("projectType", project.type || "Not specified");
+    setText("projectType", project.type || "—");
     setText("projectStatus", project.status || "Not started");
 
     setText("projectStartDate", formatDate(project.startDate));
     setText("projectDeliveryDate", formatDate(project.deliveryDate));
 
-    const progress = Number(project.progress) || 0;
+    const progress = getProgress(project.progress);
 
     setText("projectProgress", `${progress}%`);
-
-    const progressBar = document.getElementById("projectProgressBar");
-
-    if (progressBar) {
-        progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-    }
+    setProgressBar("projectProgressBar", progress);
 
     renderTimeline();
 }
 
-// ================================
+// ==========================================
 // PROJECT TIMELINE
-// ================================
+// ==========================================
 
 function renderTimeline() {
     const container = document.getElementById("projectTimeline");
-
     if (!container) return;
-
-    const timeline = currentClient.timeline || [];
 
     container.replaceChildren();
 
+    const timeline = currentClient.timeline || [];
+
     if (timeline.length === 0) {
-        container.textContent = "No project milestones available.";
+        container.appendChild(createEmptyMessage("No milestones available yet."));
         return;
     }
 
-    timeline.forEach(function (step) {
-        const item = document.createElement("div");
+    timeline.forEach(step => {
+        const item = document.createElement("article");
 
         item.className = step.completed
             ? "timeline-item completed"
@@ -264,73 +319,74 @@ function renderTimeline() {
         const content = document.createElement("div");
         content.className = "timeline-content";
 
-        const title = document.createElement("h4");
+        const title = document.createElement("h3");
         title.textContent = step.title || "Project milestone";
 
         const description = document.createElement("p");
         description.textContent = step.description || "";
 
         const date = document.createElement("span");
+        date.className = "timeline-date";
         date.textContent = formatDate(step.date);
 
-        content.append(title, description, date);
+        const status = document.createElement("span");
+        status.className = "timeline-status";
+        status.textContent = step.completed ? "Completed" : "Upcoming";
+
+        content.append(title, description, date, status);
         item.append(marker, content);
 
         container.appendChild(item);
     });
 }
 
-// ================================
+// ==========================================
 // FILES
-// ================================
+// ==========================================
 
 function renderFiles() {
     const container = document.getElementById("filesList");
-
     if (!container) return;
-
-    const files = currentClient.files || [];
 
     container.replaceChildren();
 
+    const files = currentClient.files || [];
+
     if (files.length === 0) {
-        container.textContent = "No files available yet.";
+        container.appendChild(createEmptyMessage("No files available yet."));
         return;
     }
 
-    files.forEach(function (file) {
-        const item = document.createElement("div");
+    files.forEach(file => {
+        const item = document.createElement("article");
         item.className = "file-item";
 
-        const information = document.createElement("div");
-        information.className = "file-info";
+        const icon = document.createElement("div");
+        icon.className = "file-icon";
+        icon.textContent = "▤";
 
-        const name = document.createElement("h4");
+        const info = document.createElement("div");
+        info.className = "file-info";
+
+        const name = document.createElement("h3");
         name.textContent = file.name || "Unnamed file";
 
         const details = document.createElement("span");
+        details.textContent = [
+            file.type || "File",
+            formatDate(file.date)
+        ].filter(Boolean).join(" · ");
 
-        const fileDate = file.date
-            ? formatDate(file.date)
-            : "";
-
-        const fileType = file.type || "File";
-
-        details.textContent = [fileType, fileDate]
-            .filter(Boolean)
-            .join(" • ");
-
-        information.append(name, details);
-        item.appendChild(information);
+        info.append(name, details);
+        item.append(icon, info);
 
         if (file.url) {
             const link = document.createElement("a");
-
+            link.className = "file-action";
             link.href = file.url;
-            link.textContent = "Download";
-            link.className = "file-download";
             link.target = "_blank";
             link.rel = "noopener noreferrer";
+            link.textContent = "View file →";
 
             item.appendChild(link);
         }
@@ -339,44 +395,42 @@ function renderFiles() {
     });
 }
 
-// ================================
+// ==========================================
 // INVOICES
-// ================================
+// ==========================================
 
 function renderInvoices() {
     const container = document.getElementById("invoicesList");
-
     if (!container) return;
-
-    const invoices = currentClient.invoices || [];
 
     container.replaceChildren();
 
+    const invoices = currentClient.invoices || [];
+
     if (invoices.length === 0) {
-        container.textContent = "No invoices available yet.";
+        container.appendChild(createEmptyMessage("No invoices available yet."));
         return;
     }
 
-    invoices.forEach(function (invoice) {
-        const item = document.createElement("div");
+    invoices.forEach(invoice => {
+        const item = document.createElement("article");
         item.className = "invoice-item";
 
-        const information = document.createElement("div");
-        information.className = "invoice-info";
+        const info = document.createElement("div");
+        info.className = "invoice-info";
 
-        const number = document.createElement("h4");
+        const number = document.createElement("h3");
         number.textContent = invoice.number || "Invoice";
 
         const date = document.createElement("span");
         date.textContent = formatDate(invoice.date);
 
-        const amount = document.createElement("p");
+        const amount = document.createElement("strong");
         amount.textContent = formatCurrency(invoice.amount);
 
-        information.append(number, date, amount);
+        info.append(number, date, amount);
 
         const status = document.createElement("span");
-
         const isPaid = String(invoice.status).toLowerCase() === "paid";
 
         status.className = isPaid
@@ -385,16 +439,15 @@ function renderInvoices() {
 
         status.textContent = isPaid ? "Paid" : "Unpaid";
 
-        item.append(information, status);
+        item.append(info, status);
 
         if (invoice.url) {
             const link = document.createElement("a");
-
+            link.className = "invoice-action";
             link.href = invoice.url;
-            link.textContent = "View invoice";
-            link.className = "invoice-link";
             link.target = "_blank";
             link.rel = "noopener noreferrer";
+            link.textContent = "View invoice →";
 
             item.appendChild(link);
         }
@@ -403,54 +456,80 @@ function renderInvoices() {
     });
 }
 
-// ================================
+// ==========================================
 // NAVIGATION
-// ================================
+// ==========================================
 
-const navigationLinks = document.querySelectorAll("[data-section]");
+function handleNavigation(event) {
+    event.preventDefault();
 
-navigationLinks.forEach(function (link) {
-    link.addEventListener("click", function (event) {
-        event.preventDefault();
+    if (!currentClient) return;
 
-        const section = link.dataset.section;
+    const section = event.currentTarget.dataset.section;
 
-        showSection(section);
-    });
-});
+    showSection(section);
+}
 
 function showSection(sectionName) {
-    const sections = document.querySelectorAll(".portal-section");
+    const validSections = [
+        "dashboard",
+        "project",
+        "files",
+        "invoices"
+    ];
 
-    sections.forEach(function (section) {
-        section.classList.remove("active");
-    });
-
-    const selectedSection = document.getElementById(
-        `${sectionName}Section`
-    );
-
-    if (selectedSection) {
-        selectedSection.classList.add("active");
+    if (!validSections.includes(sectionName)) {
+        sectionName = "dashboard";
     }
 
-    navigationLinks.forEach(function (link) {
+    document.querySelectorAll(".portal-section").forEach(section => {
+        section.classList.toggle(
+            "active",
+            section.id === `${sectionName}Section`
+        );
+    });
+
+    document.querySelectorAll(".nav-link").forEach(link => {
         link.classList.toggle(
             "active",
             link.dataset.section === sectionName
         );
     });
+
+    // Update URL hash without reloading the page.
+    history.replaceState(null, "", `#${sectionName}`);
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
 
-// ================================
+// ==========================================
 // HELPER FUNCTIONS
-// ================================
+// ==========================================
 
 function setText(id, value) {
     const element = document.getElementById(id);
 
     if (element) {
         element.textContent = value ?? "";
+    }
+}
+
+function getProgress(value) {
+    const progress = Number(value);
+
+    if (!Number.isFinite(progress)) return 0;
+
+    return Math.min(100, Math.max(0, progress));
+}
+
+function setProgressBar(id, progress) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.style.width = `${progress}%`;
     }
 }
 
@@ -471,18 +550,22 @@ function formatDate(dateString) {
 }
 
 function formatCurrency(amount) {
-    if (amount === undefined || amount === null || amount === "") {
+    const number = Number(amount);
+
+    if (!Number.isFinite(number)) {
         return "Amount not specified";
     }
 
     return new Intl.NumberFormat("en-GB", {
         style: "currency",
         currency: "EUR"
-    }).format(Number(amount));
+    }).format(number);
 }
 
-// ================================
-// START
-// ================================
+function createEmptyMessage(message) {
+    const element = document.createElement("p");
+    element.className = "empty-message";
+    element.textContent = message;
 
-document.addEventListener("DOMContentLoaded", loadClients);
+    return element;
+}
