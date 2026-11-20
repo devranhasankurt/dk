@@ -31,6 +31,187 @@ input {
     font: inherit;
 }
 
+button {
+    cursor: pointer;
+}
+
+
+/* ====================
+   LOGIN SCREEN
+==================== */
+
+.login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    background:
+        radial-gradient(
+            ellipse at 50% 35%,
+            rgba(255, 255, 255, 0.045),
+            transparent 55%
+        ),
+        #080808;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 410px;
+}
+
+.login-logo {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 75px;
+    font-size: 23px;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.login-logo span {
+    color: #777;
+    font-weight: 400;
+}
+
+.login-heading {
+    margin-bottom: 35px;
+}
+
+.eyebrow {
+    display: block;
+    color: #777;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 13px;
+}
+
+.login-heading h1 {
+    font-size: 34px;
+    font-weight: 500;
+    letter-spacing: -1.3px;
+    line-height: 1.2;
+}
+
+.login-heading p {
+    color: #777;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+
+/* ====================
+   LOGIN FORM
+==================== */
+
+#loginForm {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.form-group label {
+    color: #bbb;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    height: 49px;
+    padding: 0 15px;
+    background: #111;
+    border: 1px solid #292929;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    outline: none;
+    transition: 0.25s ease;
+}
+
+.form-group input::placeholder {
+    color: #555;
+}
+
+.form-group input:focus {
+    border-color: #777;
+    background: #141414;
+}
+
+.login-button {
+    width: 100%;
+    height: 49px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 5px;
+    background: #f0f0f0;
+    color: #080808;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.login-button:hover {
+    background: #ccc;
+}
+
+.login-button span {
+    font-size: 16px;
+    transition: transform 0.25s ease;
+}
+
+.login-button:hover span {
+    transform: translateX(4px);
+}
+
+.login-error {
+    display: none;
+    color: #d77b7b;
+    font-size: 11px;
+    margin-top: -12px;
+}
+
+.login-error:not(:empty) {
+    display: block;
+}
+
+.login-footer {
+    margin-top: 75px;
+    padding-top: 20px;
+    border-top: 1px solid #222;
+    text-align: center;
+}
+
+.login-footer span {
+    color: #555;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+
+/* ====================
+   PORTAL WRAPPER
+==================== */
+
+.portal-wrapper {
+    min-height: 100vh;
+}
+
+.portal-wrapper[hidden] {
+    display: none !important;
+}
+
 
 /* ====================
    SIDEBAR
@@ -114,17 +295,31 @@ input {
 .sidebar-bottom {
     margin-top: auto;
     border-top: 1px solid #202020;
-    padding-top: 22px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
 }
 
+.logout-button,
 .back-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     color: #777;
     font-size: 12px;
+    background: transparent;
+    border: none;
     transition: 0.25s ease;
 }
 
+.logout-button:hover,
 .back-link:hover {
     color: #fff;
+}
+
+.logout-button span {
+    font-size: 16px;
 }
 
 
@@ -213,11 +408,11 @@ input {
     display: none;
     padding: 55px 0 70px;
     flex: 1;
-    animation: fadeIn 0.35s ease;
 }
 
 .page-section.active {
     display: block;
+    animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
@@ -237,15 +432,6 @@ input {
     align-items: flex-end;
     justify-content: space-between;
     margin-bottom: 45px;
-}
-
-.eyebrow {
-    display: block;
-    color: #777;
-    font-size: 10px;
-    letter-spacing: 2px;
-    font-weight: 600;
-    margin-bottom: 12px;
 }
 
 .page-heading h1 {
@@ -559,6 +745,35 @@ input {
 
 
 /* ====================
+   PROJECT UPDATES
+==================== */
+
+.updates-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.update-item {
+    background: #101010;
+    border: 1px solid #242424;
+    border-radius: 6px;
+    padding: 20px;
+}
+
+.update-content h3 {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.update-content p {
+    color: #888;
+    font-size: 11px;
+}
+
+
+/* ====================
    FILES
 ==================== */
 
@@ -596,7 +811,7 @@ input {
     align-items: center;
     justify-content: center;
     color: #aaa;
-    font-size: 13px;
+    font-size: 10px;
 }
 
 .file-details {
@@ -648,7 +863,7 @@ input {
 
 .invoice-item {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr auto;
+    grid-template-columns: 1.2fr 1fr auto;
     align-items: center;
     gap: 20px;
     padding: 18px 0;
@@ -657,6 +872,12 @@ input {
 
 .invoice-item:last-child {
     border-bottom: none;
+}
+
+.invoice-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .invoice-number {
@@ -670,8 +891,15 @@ input {
     font-size: 11px;
 }
 
+.invoice-amount-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .invoice-status {
     display: inline-block;
+    width: fit-content;
     font-size: 10px;
     padding: 5px 9px;
     border-radius: 3px;
@@ -765,6 +993,10 @@ input {
 }
 
 
+/* ====================
+   TABLET / MOBILE
+==================== */
+
 @media (max-width: 768px) {
 
     .sidebar {
@@ -787,9 +1019,8 @@ input {
     }
 
     .sidebar-logo span,
-    .sidebar-label,
-    .nav-link:not(.active) {
-        font-size: 0;
+    .sidebar-label {
+        display: none;
     }
 
     .sidebar-nav {
@@ -799,18 +1030,26 @@ input {
     .nav-link {
         justify-content: center;
         padding: 13px 5px;
+        font-size: 0;
     }
 
     .nav-icon {
         font-size: 18px;
     }
 
-    .back-link {
-        font-size: 0;
+    .sidebar-bottom {
+        align-items: center;
+        width: 100%;
     }
 
+    .logout-button,
+    .back-link {
+        font-size: 0;
+        justify-content: center;
+    }
+
+    .logout-button span,
     .back-link::before {
-        content: "←";
         font-size: 18px;
     }
 
@@ -839,7 +1078,7 @@ input {
     }
 
     .invoice-item {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr auto;
     }
 
     .invoice-summary {
@@ -862,7 +1101,19 @@ input {
 }
 
 
+/* ====================
+   SMALL MOBILE
+==================== */
+
 @media (max-width: 480px) {
+
+    .login-logo {
+        margin-bottom: 55px;
+    }
+
+    .login-heading h1 {
+        font-size: 30px;
+    }
 
     .main-content {
         padding: 0 15px;
@@ -913,4 +1164,26 @@ input {
         padding: 6px 9px;
     }
 
+    .invoice-item {
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+    }
+
+    .invoice-download {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+}
+
+
+/* ====================
+   ACCESSIBILITY
+==================== */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #aaa;
+    outline-offset: 3px;
 }
