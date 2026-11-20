@@ -490,9 +490,7 @@ function renderInvoices(invoices = []) {
 
 async function loadClientData() {
     try {
-        const response = await fetch(
-            `${CLIENTS_PATH}${encodeURIComponent(clientId)}.json`
-        );
+        const response = await fetch(CLIENTS_PATH);
 
         if (!response.ok) {
             throw new Error("Client data could not be loaded.");
@@ -500,14 +498,20 @@ async function loadClientData() {
 
         const data = await response.json();
 
-        renderClient(data.client || {});
-        renderProject(data.project || {});
+        const client = data.clients.find(
+            client => client.id === clientId
+        );
 
-        renderUpdates(data.updates || []);
-        renderTimeline(data.timeline || []);
+        if (!client || !client.active) {
+            throw new Error("Client not found or inactive.");
+        }
 
-        renderFiles(data.files || []);
-        renderInvoices(data.invoices || []);
+        renderClient(client);
+        renderProject(client.project || {});
+        renderUpdates(client.updates || []);
+        renderTimeline(client.timeline || []);
+        renderFiles(client.files || []);
+        renderInvoices(client.invoices || []);
 
     } catch (error) {
         console.error("DK VISUALS Portal:", error);
@@ -518,17 +522,13 @@ async function loadClientData() {
                     <div>
                         <span class="eyebrow">DK VISUALS</span>
                         <h1>Unable to load portal.</h1>
-                        <p>
-                            Client information could not be found.
-                            Please check your portal link.
-                        </p>
+                        <p>Client information could not be found.</p>
                     </div>
                 </div>
             </div>
         `;
     }
 }
-
 
 /* ====================
    INITIALIZATION
