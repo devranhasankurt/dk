@@ -1,541 +1,488 @@
 
-/* ====================
-   DK VISUALS
-   CLIENT PORTAL
-==================== */
+const CLIENTS_PATH = "assets/data/clients.json";
 
+let clients = [];
+let currentClient = null;
 
-/* ====================
-   CONFIGURATION
-==================== */
+// ================================
+// ELEMENTS
+// ================================
 
-const CLIENTS_PATH = "clients.json";
+const loginScreen = document.getElementById("loginScreen");
+const portalContent = document.getElementById("portalContent");
 
-const params = new URLSearchParams(window.location.search);
-const clientId = params.get("client") || "client-001";
+const loginForm = document.getElementById("loginForm");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
+const loginButton = document.getElementById("loginButton");
 
+const logoutButton = document.getElementById("logoutButton");
 
-/* ====================
-   HELPERS
-==================== */
+// ================================
+// LOAD CLIENT DATA
+// ================================
 
-const getElement = (id) => document.getElementById(id);
-
-const setText = (id, value) => {
-    const element = getElement(id);
-
-    if (element) {
-        element.textContent = value ?? "—";
-    }
-};
-
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("nl-NL", {
-        style: "currency",
-        currency: "EUR"
-    }).format(Number(amount) || 0);
-};
-
-const formatDate = (date) => {
-    if (!date) return "—";
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-        return date;
-    }
-
-    return new Intl.DateTimeFormat("nl-NL", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-    }).format(parsedDate);
-};
-
-const createElement = (tag, className, text) => {
-    const element = document.createElement(tag);
-
-    if (className) {
-        element.className = className;
-    }
-
-    if (text !== undefined) {
-        element.textContent = text;
-    }
-
-    return element;
-};
-
-
-/* ====================
-   NAVIGATION
-==================== */
-
-function initializeNavigation() {
-    const links = document.querySelectorAll(".nav-link");
-    const sections = document.querySelectorAll(".page-section");
-
-    links.forEach(link => {
-        link.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            const target = link.dataset.section;
-
-            links.forEach(item => {
-                item.classList.remove("active");
-            });
-
-            sections.forEach(section => {
-                section.classList.remove("active");
-            });
-
-            link.classList.add("active");
-
-            const targetSection = getElement(target);
-
-            if (targetSection) {
-                targetSection.classList.add("active");
-            }
-
-            history.replaceState(null, "", `#${target}`);
-        });
-    });
-
-    const initialSection = window.location.hash.replace("#", "");
-
-    if (initialSection) {
-        const matchingLink = document.querySelector(
-            `.nav-link[data-section="${initialSection}"]`
-        );
-
-        if (matchingLink) {
-            matchingLink.click();
-        }
-    }
-}
-
-
-/* ====================
-   DATE
-==================== */
-
-function initializeDate() {
-    const today = new Date();
-
-    setText(
-        "currentDate",
-        new Intl.DateTimeFormat("nl-NL", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        }).format(today)
-    );
-}
-
-
-/* ====================
-   CLIENT INFORMATION
-==================== */
-
-function renderClient(client) {
-    const name = client.name || "Client";
-    const initials = name
-        .split(" ")
-        .filter(Boolean)
-        .map(part => part.charAt(0))
-        .join("")
-        .substring(0, 2)
-        .toUpperCase();
-
-    setText("clientName", name);
-    setText("welcomeName", name);
-    setText("clientAvatar", initials);
-}
-
-
-/* ====================
-   PROJECT INFORMATION
-==================== */
-
-function renderProject(project) {
-    if (!project) return;
-
-    const progress = Math.min(
-        100,
-        Math.max(0, Number(project.progress) || 0)
-    );
-
-    setText("projectName", project.name);
-    setText("projectDescription", project.description);
-    setText("projectId", project.id);
-    setText("projectStatus", project.status);
-
-    setText("startDate", formatDate(project.startDate));
-    setText("deliveryDate", formatDate(project.deliveryDate));
-    setText("projectType", project.type);
-
-    setText("progressPercentage", `${progress}%`);
-    setText("statProgress", `${progress}%`);
-
-    setText("projectPageName", project.name);
-    setText("projectPageId", project.id);
-    setText("projectPageType", project.type);
-    setText("projectPageStatus", project.status);
-    setText("projectPageStart", formatDate(project.startDate));
-    setText("projectPageDelivery", formatDate(project.deliveryDate));
-    setText("projectPageDescription", project.description);
-
-    const progressFill = getElement("progressFill");
-
-    if (progressFill) {
-        progressFill.style.width = `${progress}%`;
-    }
-}
-
-
-/* ====================
-   PROJECT UPDATES
-==================== */
-
-function renderUpdates(updates = []) {
-    const container = getElement("updatesContainer");
-
-    if (!container) return;
-
-    container.replaceChildren();
-
-    if (!updates.length) {
-        container.appendChild(
-            createElement(
-                "div",
-                "empty-state",
-                "No project updates available."
-            )
-        );
-
-        return;
-    }
-
-    updates.forEach(update => {
-        const item = createElement("div", "update-item");
-
-        const content = createElement("div", "update-content");
-
-        content.appendChild(
-            createElement("h3", "", update.title)
-        );
-
-        content.appendChild(
-            createElement("p", "", update.description)
-        );
-
-        content.appendChild(
-            createElement(
-                "span",
-                "timeline-date",
-                formatDate(update.date)
-            )
-        );
-
-        item.appendChild(content);
-        container.appendChild(item);
-    });
-}
-
-
-/* ====================
-   PROJECT TIMELINE
-==================== */
-
-function renderTimeline(timeline = []) {
-    const container = getElement("timelineContainer");
-
-    if (!container) return;
-
-    container.replaceChildren();
-
-    if (!timeline.length) {
-        container.appendChild(
-            createElement(
-                "div",
-                "empty-state",
-                "No timeline information available."
-            )
-        );
-
-        return;
-    }
-
-    timeline.forEach(step => {
-        const item = createElement(
-            "div",
-            `timeline-item ${step.completed ? "completed" : ""}`
-        );
-
-        const marker = createElement("div", "timeline-marker");
-        const content = createElement("div", "timeline-content");
-
-        content.appendChild(
-            createElement("h3", "", step.title)
-        );
-
-        content.appendChild(
-            createElement("p", "", step.description)
-        );
-
-        content.appendChild(
-            createElement(
-                "span",
-                "timeline-date",
-                formatDate(step.date)
-            )
-        );
-
-        item.appendChild(marker);
-        item.appendChild(content);
-
-        container.appendChild(item);
-    });
-}
-
-
-/* ====================
-   FILES
-==================== */
-
-function renderFiles(files = []) {
-    const container = getElement("filesContainer");
-
-    if (!container) return;
-
-    container.replaceChildren();
-
-    setText("statFiles", files.length);
-    setText("fileCount", `${files.length} files`);
-
-    if (!files.length) {
-        container.appendChild(
-            createElement(
-                "div",
-                "empty-state",
-                "No files available."
-            )
-        );
-
-        return;
-    }
-
-    files.forEach(file => {
-        const item = createElement("div", "file-item");
-        const info = createElement("div", "file-info");
-        const icon = createElement(
-            "div",
-            "file-icon",
-            (file.type || "FILE").toUpperCase()
-        );
-
-        const details = createElement("div", "file-details");
-
-        details.appendChild(
-            createElement("span", "file-name", file.name)
-        );
-
-        details.appendChild(
-            createElement(
-                "span",
-                "file-meta",
-                `${file.size || "—"} · ${formatDate(file.date)}`
-            )
-        );
-
-        info.appendChild(icon);
-        info.appendChild(details);
-
-        const download = createElement(
-            "a",
-            "file-download",
-            "Download ↓"
-        );
-
-        download.href = file.url || "#";
-        download.setAttribute("download", "");
-
-        if (!file.url) {
-            download.addEventListener("click", event => {
-                event.preventDefault();
-            });
-        }
-
-        item.appendChild(info);
-        item.appendChild(download);
-
-        container.appendChild(item);
-    });
-}
-
-
-/* ====================
-   INVOICES
-==================== */
-
-function renderInvoices(invoices = []) {
-    const container = getElement("invoicesContainer");
-
-    if (!container) return;
-
-    container.replaceChildren();
-
-    let total = 0;
-    let paid = 0;
-    let outstanding = 0;
-
-    invoices.forEach(invoice => {
-        const amount = Number(invoice.amount) || 0;
-
-        total += amount;
-
-        if (invoice.status === "paid") {
-            paid += amount;
-        } else {
-            outstanding += amount;
-        }
-    });
-
-    setText("totalInvoiced", formatCurrency(total));
-    setText("totalPaid", formatCurrency(paid));
-    setText("totalUnpaid", formatCurrency(outstanding));
-
-    setText("statInvoices", invoices.length);
-    setText("statOutstanding", formatCurrency(outstanding));
-
-    setText("invoiceCount", `${invoices.length} invoices`);
-
-    if (!invoices.length) {
-        container.appendChild(
-            createElement(
-                "div",
-                "empty-state",
-                "No invoices available."
-            )
-        );
-
-        return;
-    }
-
-    invoices.forEach(invoice => {
-        const item = createElement("div", "invoice-item");
-
-        const number = createElement(
-            "span",
-            "invoice-number",
-            invoice.number
-        );
-
-        const date = createElement(
-            "span",
-            "invoice-date",
-            formatDate(invoice.date)
-        );
-
-        const amount = createElement(
-            "span",
-            "invoice-amount",
-            formatCurrency(invoice.amount)
-        );
-
-        const status = createElement(
-            "span",
-            `invoice-status ${invoice.status === "paid" ? "" : "unpaid"}`,
-            invoice.status === "paid" ? "Paid" : "Unpaid"
-        );
-
-        const info = createElement("div", "invoice-info");
-
-        info.appendChild(number);
-        info.appendChild(date);
-
-        const amountInfo = createElement("div", "invoice-amount-info");
-
-        amountInfo.appendChild(amount);
-        amountInfo.appendChild(status);
-
-        const download = createElement(
-            "a",
-            "invoice-download",
-            "Download ↓"
-        );
-
-        download.href = invoice.url || "#";
-        download.setAttribute("download", "");
-
-        if (!invoice.url) {
-            download.addEventListener("click", event => {
-                event.preventDefault();
-            });
-        }
-
-        item.appendChild(info);
-        item.appendChild(amountInfo);
-        item.appendChild(download);
-
-        container.appendChild(item);
-    });
-}
-
-
-/* ====================
-   LOAD CLIENT JSON
-==================== */
-
-async function loadClientData() {
+async function loadClients() {
     try {
         const response = await fetch(CLIENTS_PATH);
 
         if (!response.ok) {
-            throw new Error("Client data could not be loaded.");
+            throw new Error("Could not load clients.json");
         }
 
         const data = await response.json();
 
-        const client = data.clients.find(
-            client => client.id === clientId
-        );
-
-        if (!client || !client.active) {
-            throw new Error("Client not found or inactive.");
+        if (!Array.isArray(data.clients)) {
+            throw new Error("Invalid clients.json structure");
         }
 
-        renderClient(client);
-        renderProject(client.project || {});
-        renderUpdates(client.updates || []);
-        renderTimeline(client.timeline || []);
-        renderFiles(client.files || []);
-        renderInvoices(client.invoices || []);
+        clients = data.clients;
 
     } catch (error) {
-        console.error("DK VISUALS Portal:", error);
+        console.error("Client data error:", error);
 
-        document.querySelector(".main-content").innerHTML = `
-            <div class="page-section active">
-                <div class="page-heading">
-                    <div>
-                        <span class="eyebrow">DK VISUALS</span>
-                        <h1>Unable to load portal.</h1>
-                        <p>Client information could not be found.</p>
-                    </div>
-                </div>
-            </div>
-        `;
+        loginError.textContent =
+            "Unable to load client data. Please try again later.";
+
+        loginButton.disabled = true;
     }
 }
 
-/* ====================
-   INITIALIZATION
-==================== */
+// ================================
+// LOGIN
+// ================================
 
-document.addEventListener("DOMContentLoaded", () => {
-    initializeNavigation();
-    initializeDate();
-    loadClientData();
+loginForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    loginError.textContent = "";
+
+    const email = loginEmail.value.trim().toLowerCase();
+    const password = loginPassword.value;
+
+    const client = clients.find(function (item) {
+        return (
+            item.email.toLowerCase() === email &&
+            item.password === password &&
+            item.active === true
+        );
+    });
+
+    if (!client) {
+        loginError.textContent =
+            "Incorrect email or password.";
+
+        return;
+    }
+
+    currentClient = client;
+
+    loginScreen.hidden = true;
+    portalContent.hidden = false;
+
+    loginPassword.value = "";
+
+    renderPortal();
 });
+
+// ================================
+// LOGOUT
+// ================================
+
+logoutButton.addEventListener("click", function () {
+    currentClient = null;
+
+    portalContent.hidden = true;
+    loginScreen.hidden = false;
+
+    loginForm.reset();
+    loginError.textContent = "";
+
+    showSection("dashboard");
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+});
+
+// ================================
+// PORTAL INITIALIZATION
+// ================================
+
+function renderPortal() {
+    if (!currentClient) return;
+
+    renderClientInfo();
+    renderDashboard();
+    renderProject();
+    renderFiles();
+    renderInvoices();
+
+    showSection("dashboard");
+}
+
+// ================================
+// CLIENT INFORMATION
+// ================================
+
+function renderClientInfo() {
+    const clientName = document.getElementById("clientName");
+    const clientEmail = document.getElementById("clientEmail");
+
+    if (clientName) {
+        clientName.textContent = currentClient.name || "Client";
+    }
+
+    if (clientEmail) {
+        clientEmail.textContent = currentClient.email || "";
+    }
+}
+
+// ================================
+// DASHBOARD
+// ================================
+
+function renderDashboard() {
+    const project = currentClient.project || {};
+
+    setText("dashboardClientName", currentClient.name || "Client");
+    setText("dashboardProjectName", project.name || "No project");
+    setText("dashboardProjectStatus", project.status || "Not started");
+
+    const progress = Number(project.progress) || 0;
+
+    setText("dashboardProgress", `${progress}%`);
+
+    const progressBar = document.getElementById("dashboardProgressBar");
+
+    if (progressBar) {
+        progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    }
+
+    setText(
+        "dashboardDeliveryDate",
+        formatDate(project.deliveryDate)
+    );
+
+    renderRecentUpdates();
+}
+
+// ================================
+// RECENT UPDATES
+// ================================
+
+function renderRecentUpdates() {
+    const container = document.getElementById("recentUpdates");
+
+    if (!container) return;
+
+    const updates = currentClient.updates || [];
+
+    container.replaceChildren();
+
+    if (updates.length === 0) {
+        container.textContent = "No updates available yet.";
+        return;
+    }
+
+    updates.slice().reverse().forEach(function (update) {
+        const item = document.createElement("div");
+        item.className = "update-item";
+
+        const title = document.createElement("h4");
+        title.textContent = update.title || "Project update";
+
+        const description = document.createElement("p");
+        description.textContent = update.description || "";
+
+        const date = document.createElement("span");
+        date.textContent = formatDate(update.date);
+
+        item.append(title, description, date);
+        container.appendChild(item);
+    });
+}
+
+// ================================
+// PROJECT
+// ================================
+
+function renderProject() {
+    const project = currentClient.project || {};
+
+    setText("projectName", project.name || "No project");
+    setText("projectDescription", project.description || "");
+    setText("projectType", project.type || "Not specified");
+    setText("projectStatus", project.status || "Not started");
+
+    setText("projectStartDate", formatDate(project.startDate));
+    setText("projectDeliveryDate", formatDate(project.deliveryDate));
+
+    const progress = Number(project.progress) || 0;
+
+    setText("projectProgress", `${progress}%`);
+
+    const progressBar = document.getElementById("projectProgressBar");
+
+    if (progressBar) {
+        progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    }
+
+    renderTimeline();
+}
+
+// ================================
+// PROJECT TIMELINE
+// ================================
+
+function renderTimeline() {
+    const container = document.getElementById("projectTimeline");
+
+    if (!container) return;
+
+    const timeline = currentClient.timeline || [];
+
+    container.replaceChildren();
+
+    if (timeline.length === 0) {
+        container.textContent = "No project milestones available.";
+        return;
+    }
+
+    timeline.forEach(function (step) {
+        const item = document.createElement("div");
+
+        item.className = step.completed
+            ? "timeline-item completed"
+            : "timeline-item";
+
+        const marker = document.createElement("div");
+        marker.className = "timeline-marker";
+
+        const content = document.createElement("div");
+        content.className = "timeline-content";
+
+        const title = document.createElement("h4");
+        title.textContent = step.title || "Project milestone";
+
+        const description = document.createElement("p");
+        description.textContent = step.description || "";
+
+        const date = document.createElement("span");
+        date.textContent = formatDate(step.date);
+
+        content.append(title, description, date);
+        item.append(marker, content);
+
+        container.appendChild(item);
+    });
+}
+
+// ================================
+// FILES
+// ================================
+
+function renderFiles() {
+    const container = document.getElementById("filesList");
+
+    if (!container) return;
+
+    const files = currentClient.files || [];
+
+    container.replaceChildren();
+
+    if (files.length === 0) {
+        container.textContent = "No files available yet.";
+        return;
+    }
+
+    files.forEach(function (file) {
+        const item = document.createElement("div");
+        item.className = "file-item";
+
+        const information = document.createElement("div");
+        information.className = "file-info";
+
+        const name = document.createElement("h4");
+        name.textContent = file.name || "Unnamed file";
+
+        const details = document.createElement("span");
+
+        const fileDate = file.date
+            ? formatDate(file.date)
+            : "";
+
+        const fileType = file.type || "File";
+
+        details.textContent = [fileType, fileDate]
+            .filter(Boolean)
+            .join(" • ");
+
+        information.append(name, details);
+        item.appendChild(information);
+
+        if (file.url) {
+            const link = document.createElement("a");
+
+            link.href = file.url;
+            link.textContent = "Download";
+            link.className = "file-download";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+
+            item.appendChild(link);
+        }
+
+        container.appendChild(item);
+    });
+}
+
+// ================================
+// INVOICES
+// ================================
+
+function renderInvoices() {
+    const container = document.getElementById("invoicesList");
+
+    if (!container) return;
+
+    const invoices = currentClient.invoices || [];
+
+    container.replaceChildren();
+
+    if (invoices.length === 0) {
+        container.textContent = "No invoices available yet.";
+        return;
+    }
+
+    invoices.forEach(function (invoice) {
+        const item = document.createElement("div");
+        item.className = "invoice-item";
+
+        const information = document.createElement("div");
+        information.className = "invoice-info";
+
+        const number = document.createElement("h4");
+        number.textContent = invoice.number || "Invoice";
+
+        const date = document.createElement("span");
+        date.textContent = formatDate(invoice.date);
+
+        const amount = document.createElement("p");
+        amount.textContent = formatCurrency(invoice.amount);
+
+        information.append(number, date, amount);
+
+        const status = document.createElement("span");
+
+        const isPaid = String(invoice.status).toLowerCase() === "paid";
+
+        status.className = isPaid
+            ? "invoice-status paid"
+            : "invoice-status unpaid";
+
+        status.textContent = isPaid ? "Paid" : "Unpaid";
+
+        item.append(information, status);
+
+        if (invoice.url) {
+            const link = document.createElement("a");
+
+            link.href = invoice.url;
+            link.textContent = "View invoice";
+            link.className = "invoice-link";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+
+            item.appendChild(link);
+        }
+
+        container.appendChild(item);
+    });
+}
+
+// ================================
+// NAVIGATION
+// ================================
+
+const navigationLinks = document.querySelectorAll("[data-section]");
+
+navigationLinks.forEach(function (link) {
+    link.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        const section = link.dataset.section;
+
+        showSection(section);
+    });
+});
+
+function showSection(sectionName) {
+    const sections = document.querySelectorAll(".portal-section");
+
+    sections.forEach(function (section) {
+        section.classList.remove("active");
+    });
+
+    const selectedSection = document.getElementById(
+        `${sectionName}Section`
+    );
+
+    if (selectedSection) {
+        selectedSection.classList.add("active");
+    }
+
+    navigationLinks.forEach(function (link) {
+        link.classList.toggle(
+            "active",
+            link.dataset.section === sectionName
+        );
+    });
+}
+
+// ================================
+// HELPER FUNCTIONS
+// ================================
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.textContent = value ?? "";
+    }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return "Not specified";
+
+    const date = new Date(`${dateString}T00:00:00`);
+
+    if (Number.isNaN(date.getTime())) {
+        return dateString;
+    }
+
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+    }).format(date);
+}
+
+function formatCurrency(amount) {
+    if (amount === undefined || amount === null || amount === "") {
+        return "Amount not specified";
+    }
+
+    return new Intl.NumberFormat("en-GB", {
+        style: "currency",
+        currency: "EUR"
+    }).format(Number(amount));
+}
+
+// ================================
+// START
+// ================================
+
+document.addEventListener("DOMContentLoaded", loadClients);
