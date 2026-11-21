@@ -107,11 +107,122 @@
             font-weight: 300;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
         .header-label {
             color: #777;
             font-size: 11px;
             letter-spacing: 2px;
             text-transform: uppercase;
+        }
+
+        /* =========================
+           LANGUAGE SELECTOR
+        ========================= */
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-button {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 13px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.25s, border-color 0.25s;
+        }
+
+        .language-button:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .language-button svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .language-arrow {
+            width: 10px !important;
+            height: 10px !important;
+            transition: transform 0.25s;
+        }
+
+        .language-button[aria-expanded="true"] .language-arrow {
+            transform: rotate(180deg);
+        }
+
+        .language-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 145px;
+            padding: 5px;
+            background: #111;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+            z-index: 10;
+        }
+
+        .language-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 11px 10px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: #999;
+            font-family: inherit;
+            font-size: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .language-option:hover {
+            background: rgba(255,255,255,0.07);
+            color: #fff;
+        }
+
+        .language-option.active {
+            color: #fff;
+        }
+
+        .language-option .check {
+            opacity: 0;
+            color: #fff;
+        }
+
+        .language-option.active .check {
+            opacity: 1;
         }
 
         /* =========================
@@ -256,9 +367,16 @@
                 font-size: 16px;
             }
 
+            .header-right {
+                gap: 12px;
+            }
+
             .header-label {
-                font-size: 9px;
-                letter-spacing: 1px;
+                display: none;
+            }
+
+            .language-button {
+                padding: 9px 11px;
             }
 
             h1 {
@@ -287,14 +405,66 @@
     <div class="page">
 
         <header>
+
             <div class="logo">DK <span>VISUALS</span></div>
 
-            <div class="header-label">
-                Digital Experiences
+            <div class="header-right">
+
+                <div class="header-label" data-i18n="header">
+                    Digital Experiences
+                </div>
+
+                <div class="language-selector">
+
+                    <button
+                        class="language-button"
+                        id="languageButton"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="languageMenu"
+                        aria-label="Select language"
+                    >
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M3 12h18"></path>
+                            <path d="M12 3a15 15 0 0 1 0 18"></path>
+                            <path d="M12 3a15 15 0 0 0 0 18"></path>
+                        </svg>
+
+                        <span id="currentLanguage">EN</span>
+
+                        <svg class="language-arrow" viewBox="0 0 24 24">
+                            <path d="m6 9 6 6 6-6"></path>
+                        </svg>
+                    </button>
+
+                    <div class="language-menu" id="languageMenu">
+
+                        <button class="language-option" type="button" data-language="en">
+                            English
+                            <span class="check">✓</span>
+                        </button>
+
+                        <button class="language-option" type="button" data-language="nl">
+                            Nederlands
+                            <span class="check">✓</span>
+                        </button>
+
+                        <button class="language-option" type="button" data-language="tr">
+                            Türkçe
+                            <span class="check">✓</span>
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
+
         </header>
 
         <main>
+
             <div class="content">
 
                 <div class="status">
@@ -322,6 +492,7 @@
                 </p>
 
             </div>
+
         </main>
 
         <footer>
@@ -331,14 +502,162 @@
 
     </div>
 
+    <script>
+        /* =========================
+           TRANSLATIONS
+        ========================= */
 
-<script>
-    alert(
-        "navigator.language: " + navigator.language +
-        "\nnavigator.languages: " + JSON.stringify(navigator.languages)
-    );
-</script>
+        const translations = {
 
+            en: {
+                header: "Digital Experiences",
+                status: "Website under maintenance",
+                heading1: "We're working",
+                heading2: "on something.",
+                description: "We're currently making improvements to our website to bring you a better experience. We'll be back online shortly.",
+                patience: "Thank you for your patience"
+            },
+
+            nl: {
+                header: "Digitale ervaringen",
+                status: "Website in onderhoud",
+                heading1: "We werken",
+                heading2: "aan iets nieuws.",
+                description: "We verbeteren momenteel onze website om je een betere ervaring te bieden. We zijn binnenkort weer online.",
+                patience: "Bedankt voor je geduld"
+            },
+
+            tr: {
+                header: "Dijital Deneyimler",
+                status: "Web sitesi bakımda",
+                heading1: "Web sitemizi",
+                heading2: "geliştiriyoruz.",
+                description: "Size daha iyi bir deneyim sunmak için web sitemizde iyileştirmeler yapıyoruz. Çok yakında tekrar yayında olacağız.",
+                patience: "Anlayışınız için teşekkür ederiz"
+            }
+
+        };
+
+        /* =========================
+           LANGUAGE ELEMENTS
+        ========================= */
+
+        const languageButton = document.getElementById("languageButton");
+        const languageMenu = document.getElementById("languageMenu");
+        const currentLanguage = document.getElementById("currentLanguage");
+        const languageOptions = document.querySelectorAll(".language-option");
+
+        /* =========================
+           CHANGE LANGUAGE
+        ========================= */
+
+        function setLanguage(language) {
+
+            if (!translations[language]) {
+                language = "en";
+            }
+
+            document.documentElement.lang = language;
+
+            document.querySelectorAll("[data-i18n]").forEach(element => {
+
+                const key = element.dataset.i18n;
+
+                element.textContent = translations[language][key];
+
+            });
+
+            currentLanguage.textContent = language.toUpperCase();
+
+            languageOptions.forEach(option => {
+
+                const isActive = option.dataset.language === language;
+
+                option.classList.toggle("active", isActive);
+
+                option.setAttribute("aria-pressed", isActive);
+
+            });
+
+            localStorage.setItem("dkvisuals-language", language);
+
+        }
+
+        /* =========================
+           OPEN / CLOSE MENU
+        ========================= */
+
+        languageButton.addEventListener("click", () => {
+
+            const isOpen = languageMenu.classList.toggle("open");
+
+            languageButton.setAttribute("aria-expanded", isOpen);
+
+        });
+
+        /* =========================
+           SELECT LANGUAGE
+        ========================= */
+
+        languageOptions.forEach(option => {
+
+            option.addEventListener("click", () => {
+
+                const selectedLanguage = option.dataset.language;
+
+                setLanguage(selectedLanguage);
+
+                languageMenu.classList.remove("open");
+
+                languageButton.setAttribute("aria-expanded", "false");
+
+            });
+
+        });
+
+        /* =========================
+           CLOSE MENU ON OUTSIDE CLICK
+        ========================= */
+
+        document.addEventListener("click", event => {
+
+            if (!event.target.closest(".language-selector")) {
+
+                languageMenu.classList.remove("open");
+
+                languageButton.setAttribute("aria-expanded", "false");
+
+            }
+
+        });
+
+        /* =========================
+           CLOSE MENU WITH ESCAPE
+        ========================= */
+
+        document.addEventListener("keydown", event => {
+
+            if (event.key === "Escape") {
+
+                languageMenu.classList.remove("open");
+
+                languageButton.setAttribute("aria-expanded", "false");
+
+                languageButton.focus();
+
+            }
+
+        });
+
+        /* =========================
+           INITIAL LANGUAGE
+        ========================= */
+
+        const savedLanguage = localStorage.getItem("dkvisuals-language") || "en";
+
+        setLanguage(savedLanguage);
+
+    </script>
 
 </body>
 </html>
