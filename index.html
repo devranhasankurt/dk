@@ -288,7 +288,10 @@
 
         <header>
             <div class="logo">DK <span>VISUALS</span></div>
-            <div class="header-label">Digital Experiences</div>
+
+            <div class="header-label">
+                Digital Experiences
+            </div>
         </header>
 
         <main>
@@ -296,15 +299,17 @@
 
                 <div class="status">
                     <span class="status-dot"></span>
-                    Website under maintenance
+                    <span data-i18n="status">
+                        Website under maintenance
+                    </span>
                 </div>
 
                 <h1>
-                    We're working<br>
-                    <span>on something.</span>
+                    <span data-i18n="heading1">We're working</span><br>
+                    <span data-i18n="heading2">on something.</span>
                 </h1>
 
-                <p class="description">
+                <p class="description" data-i18n="description">
                     We're currently making improvements to our website
                     to bring you a better experience.
                     We'll be back online shortly.
@@ -312,7 +317,7 @@
 
                 <div class="divider"></div>
 
-                <p class="small-text">
+                <p class="small-text" data-i18n="patience">
                     Thank you for your patience
                 </p>
 
@@ -327,51 +332,62 @@
     </div>
 
     <script>
-        
-const translations = {
-    en: {
-        status: "Website under maintenance",
-        heading1: "We're working",
-        heading2: "on something.",
-        description: "We're currently making improvements to our website to bring you a better experience. We'll be back online shortly.",
-        patience: "Thank you for your patience"
-    },
+        /* =========================
+           LANGUAGE DETECTION
+        ========================= */
 
-    nl: {
-        status: "Website in onderhoud",
-        heading1: "We werken",
-        heading2: "aan iets nieuws.",
-        description: "We verbeteren momenteel onze website om je een betere ervaring te bieden. We zijn binnenkort weer online.",
-        patience: "Bedankt voor je geduld"
-    },
+        const translations = {
 
-    tr: {
-        status: "Web sitesi bakımda",
-        heading1: "Web sitemizi",
-        heading2: "geliştiriyoruz.",
-        description: "Size daha iyi bir deneyim sunmak için web sitemizde iyileştirmeler yapıyoruz. Çok yakında tekrar yayında olacağız.",
-        patience: "Anlayışınız için teşekkür ederiz"
-    }
-};
+            en: {
+                status: "Website under maintenance",
+                heading1: "We're working",
+                heading2: "on something.",
+                description: "We're currently making improvements to our website to bring you a better experience. We'll be back online shortly.",
+                patience: "Thank you for your patience"
+            },
 
-function setLanguage() {
-    const browserLanguage = navigator.language.toLowerCase();
-    const language = browserLanguage.startsWith("nl")
-        ? "nl"
-        : browserLanguage.startsWith("tr")
-        ? "tr"
-        : "en";
+            nl: {
+                status: "Website in onderhoud",
+                heading1: "We werken",
+                heading2: "aan iets nieuws.",
+                description: "We verbeteren momenteel onze website om je een betere ervaring te bieden. We zijn binnenkort weer online.",
+                patience: "Bedankt voor je geduld"
+            },
 
-    document.documentElement.lang = language;
+            tr: {
+                status: "Web sitesi bakımda",
+                heading1: "Web sitemizi",
+                heading2: "geliştiriyoruz.",
+                description: "Size daha iyi bir deneyim sunmak için web sitemizde iyileştirmeler yapıyoruz. Çok yakında tekrar yayında olacağız.",
+                patience: "Anlayışınız için teşekkür ederiz"
+            }
 
-    document.querySelectorAll("[data-i18n]").forEach(element => {
-        const key = element.dataset.i18n;
-        element.textContent = translations[language][key];
-    });
-}
+        };
 
-setLanguage();
+        function setLanguage() {
 
+            const browserLanguage = navigator.language.toLowerCase();
+
+            const language = browserLanguage.startsWith("nl")
+                ? "nl"
+                : browserLanguage.startsWith("tr")
+                ? "tr"
+                : "en";
+
+            document.documentElement.lang = language;
+
+            document.querySelectorAll("[data-i18n]").forEach(element => {
+
+                const key = element.dataset.i18n;
+
+                element.textContent = translations[language][key];
+
+            });
+
+        }
+
+        setLanguage();
     </script>
+
 </body>
 </html>
