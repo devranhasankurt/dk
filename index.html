@@ -364,29 +364,14 @@
 
         };
 
-        function setLanguage() {
+function setLanguage() {
+    alert(
+        "Browser language: " + navigator.language +
+        "\nPreferred languages: " + navigator.languages.join(", ")
+    );
+}
 
-            const browserLanguage = navigator.language.toLowerCase();
-
-            const language = browserLanguage.startsWith("nl")
-                ? "nl"
-                : browserLanguage.startsWith("tr")
-                ? "tr"
-                : "en";
-
-            document.documentElement.lang = language;
-
-            document.querySelectorAll("[data-i18n]").forEach(element => {
-
-                const key = element.dataset.i18n;
-
-                element.textContent = translations[language][key];
-
-            });
-
-        }
-
-        setLanguage();
+setLanguage();
     </script>
 
 </body>
